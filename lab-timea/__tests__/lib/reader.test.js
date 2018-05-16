@@ -1,21 +1,12 @@
 'use strict';
 
-// When mocking out embedded modules like fs or buffer, you have to tell jest to mock it
-// For 3rd party modules, you can "auto" mock them by simply putting them in the correct __mocks__ folder
-// jest.mock('fs');
-
 const reader = require('../../lib/reader.js');
 
 describe('File Reader Module', () => {
 
-  it('when given a bad file, returns an error', () => {
-    // Note that the actual path here doesn't really matter.
-    // If we weren't mocking, it would.  The "fs" module would need
-    // to find the actual file.
-    //
-    // Also note that this file is named "bad.txt".  Our mock fs module
-    // will always return an error if a file has the word "bad" in its name
-    let file = `${__dirname}/../../data/bad.txt`;
+  it('when given a bad filepath, returns an error', () => {
+   
+    let file = `${__dirname}/../../data/file.txt`;
     reader(file, (err,data) => {
       expect(err).toBeDefined();
     });
@@ -24,11 +15,23 @@ describe('File Reader Module', () => {
   it('when given a real file, returns the contents', () => {
     let file = `${__dirname}/../../data/file1.txt`;
     reader(file, (err,data) => {
-      expect(err).toBeUndefined();
-      // We don't need to care what the text is, only that we got back a string
-      // That's the interface of our reader module: Give a file+cb, get back stringified  contents
+      expect(err).toBeUndefined(); 
       expect(typeof data).toBe('string');
     });
   });
+
+  it('should return null if invalid arguments are passed', () => {
+    // console.log(reader(4));
+    expect(reader(4)).toBeNull();
+    expect(reader([4, 5])).toBeNull();
+  });
+
+  it('should print the content of the files in order of the files', () => {
+    return reader(['../../data/file1.txt', '../../data/file2.txt', '../../data/file3.txt'], (err, callback) => {
+      if (err) console.error(err);
+      callback = callback.map(file => file.charAt(0));
+      expect(callback).toBe('B', 'T', 'M');
+    })
+  })
 
 });
